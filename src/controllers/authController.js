@@ -122,8 +122,8 @@ exports.googleCallback = (req, res) => {
         const token = signToken(user._id, user.name, user.email, user.avatar);
         res.cookie('jwt', token, {
             httpOnly: true,           // Prevents JavaScript access
-            secure: false,
-            sameSite: 'lax',
+            secure: true,
+            sameSite: 'none',
             maxAge: 24 * 60 * 60 * 1000 // 24 hours
         });
 
