@@ -35,7 +35,7 @@ const app = express();
 
 // CORS configuration
 const corsOptions = {
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || 'http://localhost:3000',
+  origin: process.env.ALLOWED_ORIGINS?.split(',') || 'http://localhost:3000' || 'https://cloud-project24.vercel.app',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
