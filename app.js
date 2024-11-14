@@ -20,13 +20,15 @@ const passport = require('passport');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 // const helmet = require('helmet');
 const message = require('./utils');
 const passportSetup = require('./src/config/passport');
 
 const authRoutes = require('./src/routes/authRoutes');
 const courseRoutes = require('./src/routes/courseRoute');
-
+const coursesRoutes = require('./src/routes/coursesRoutes');
+const { isAuthenticated } = require('./src/middleware/auth');
 const PORT = process.env.PORT || 8080;
 const app = express();
 
@@ -60,27 +62,29 @@ const sessionConfig = {
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
+    // secure: process.env.NODE_ENV === 'production',
+    httpOnly: false,
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   },
 };
 
 // Use secure cookies in production
-if (app.get('env') === 'production') {
-  app.set('trust proxy', 1);
-  sessionConfig.cookie.secure = true;
-}
+// if (app.get('env') === 'production') {
+//   app.set('trust proxy', 1);
+//   sessionConfig.cookie.secure = true;
+// }
 
 app.use(session(sessionConfig));
-
+app.use(cookieParser())
 // Passport middleware
 app.use(passport.initialize());
 app.use(passport.session());
 
 // Routes
 app.use('/auth', authRoutes);
-app.use('/api/courses', courseRoutes);
+app.use('/course', courseRoutes);
+app.use('/courses', coursesRoutes)
+
 
 // Welcome route
 app.get('/', function (req, res) {

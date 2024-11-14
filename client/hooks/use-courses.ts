@@ -18,7 +18,7 @@ export function useCourses() {
 
     try {
       const response = await axios.get<ApiResponse<Course[]>>(
-        `${process.env.NEXT_PUBLIC_APP_URL}/api/courses`,
+        `${process.env.NEXT_PUBLIC_APP_URL}/course`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -47,7 +47,7 @@ export function useCourses() {
   const addCourse = async (course: Omit<Course, "_id">) => {
     try {
       const response = await axios.post<ApiResponse<Course[]>>(
-        `${process.env.NEXT_PUBLIC_APP_URL}/api/courses`,
+        `${process.env.NEXT_PUBLIC_APP_URL}/course`,
         course,
         {
           headers: {
@@ -78,7 +78,7 @@ export function useCourses() {
 
   const updateCourse = async (id: string, updatedCourse: Course) => {
     try {
-      const response = await axios.patch(`/api/courses/${id}`, updatedCourse, {
+      const response = await axios.patch(`/course/${id}`, updatedCourse, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -107,7 +107,7 @@ export function useCourses() {
   const deleteCourse = async (id: string) => {
     try {
       const response = await axios.delete<ApiResponse<Course[]>>(
-        `${process.env.NEXT_PUBLIC_APP_URL}/api/courses/${id}`
+        `${process.env.NEXT_PUBLIC_APP_URL}/course/${id}`
       );
       if (response.status === 200) {
         setCourses(courses.filter((course) => course._id !== id));

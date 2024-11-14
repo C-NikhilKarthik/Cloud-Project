@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 interface CourseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -22,31 +23,40 @@ export const CourseDialog: React.FC<CourseDialogProps> = ({
   onSave,
   course,
 }) => {
-  // Initialize state variables for each course field
-  const [name, setName] = useState(course?.title || ""); // Use `title` instead of `name` to match the course property
-  const [description, setDescription] = useState(course?.details || ""); // Use `details` instead of `description`
-  const [semester, setSemester] = useState(course?.semester || 0); // Add semester field
-  const [status, setStatus] = useState(course?.enrollStatus || ""); // Add status field
+  // Single state object to manage all fields
+  const [formData, setFormData] = useState({
+    title: course?.title || "",
+    details: course?.details || "",
+    semester: course?.semester || 0,
+    enrollStatus: course?.enrollStatus || "",
+    type: course?.type || "",
+  });
 
-  // Update state when the course changes
   useEffect(() => {
     if (course) {
-      setName(course.title);
-      setDescription(course.details);
-      setSemester(course.semester);
-      setStatus(course.enrollStatus);
+      setFormData({
+        title: course.title,
+        details: course.details,
+        semester: course.semester,
+        enrollStatus: course.enrollStatus,
+        type: course.type,
+      });
     }
   }, [course]);
 
-  // Handle save action
+  const handleChange = (field: string, value: string | number) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [field]: value,
+    }));
+  };
+
   const handleSave = () => {
-    if (name && description && semester && status) {
+    const { title, details, semester, enrollStatus, type } = formData;
+    if (title && details && semester && enrollStatus && type) {
       onSave({
-        ...course, // Retain existing course data
-        title: name, // Update with new name
-        details: description, // Update with new details
-        semester: semester, // Update with new semester
-        enrollStatus: status, // Update with new status
+        ...course,
+        ...formData,
       });
     }
   };
@@ -54,50 +64,101 @@ export const CourseDialog: React.FC<CourseDialogProps> = ({
   return (
     open && (
       <div className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50">
-        <div className="bg-white p-6 rounded-md flex flex-col gap-4 w-96">
-          <h2 className="text-lg font-semibold">
+        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-lg">
+          <h2 className="text-xl font-bold mb-6 text-gray-800">
             {course ? "Edit Course" : "Add New Course"}
           </h2>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Course Title"
-            className="p-2 border rounded-md w-full"
-          />
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Course Details"
-            className="p-2 border rounded-md w-full"
-          />
-          <input
-            type="number"
-            value={semester}
-            onChange={(e) => setSemester(Number(e.target.value))}
-            placeholder="Semester"
-            className="p-2 border rounded-md w-full"
-          />
 
-          <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="open">Open</SelectItem>
-              <SelectItem value="ongoing">Ongoing</SelectItem>
-              <SelectItem value="closed">Closed</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-1">
+              <label className="block text-gray-600 text-sm font-medium mb-1">
+                Course Title
+              </label>
+              <input
+                type="text"
+                value={formData.title}
+                onChange={(e) => handleChange("title", e.target.value)}
+                placeholder="Enter course title"
+                className="p-2 border border-gray-300 rounded-md w-full"
+              />
+            </div>
 
-          <div className="mt-4 flex justify-end">
+            <div className="col-span-1">
+              <label className="block text-gray-600 text-sm font-medium mb-1">
+                Semester
+              </label>
+              <input
+                type="number"
+                value={formData.semester}
+                onChange={(e) =>
+                  handleChange("semester", Number(e.target.value))
+                }
+                placeholder="Semester"
+                className="p-2 border border-gray-300 rounded-md w-full"
+              />
+            </div>
+
+            <div className="col-span-2">
+              <label className="block text-gray-600 text-sm font-medium mb-1">
+                Course Details
+              </label>
+              <textarea
+                value={formData.details}
+                onChange={(e) => handleChange("details", e.target.value)}
+                placeholder="Enter course details"
+                className="p-2 border border-gray-300 rounded-md w-full"
+              />
+            </div>
+
+            <div className="col-span-1">
+              <label className="block text-gray-600 text-sm font-medium mb-1">
+                Enrollment Status
+              </label>
+              <Select
+                value={formData.enrollStatus}
+                onValueChange={(value) => handleChange("enrollStatus", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="open">Open</SelectItem>
+                  <SelectItem value="ongoing">Ongoing</SelectItem>
+                  <SelectItem value="closed">Closed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="col-span-1">
+              <label className="block text-gray-600 text-sm font-medium mb-1">
+                Course Type
+              </label>
+              <Select
+                value={formData.type}
+                onValueChange={(value) => handleChange("type", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="elective">Elective</SelectItem>
+                  <SelectItem value="theory">Theory</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="mt-6 flex justify-end">
             <button
               onClick={() => onOpenChange(false)}
               className="mr-4 text-gray-600"
             >
               Cancel
             </button>
-            <button onClick={handleSave} className="text-blue-600">
+            <button
+              onClick={handleSave}
+              className="text-blue-600 font-semibold"
+            >
               Save
             </button>
           </div>

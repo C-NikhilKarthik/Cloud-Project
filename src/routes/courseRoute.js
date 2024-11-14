@@ -7,12 +7,12 @@ const { protect, isInstructor, isAuthenticated } = require('../middleware/auth')
 
 router
     .route('/')
-    .get(courseController.getAllCourses)
-    .post(courseController.createCourse);
+    .post(isAuthenticated, courseController.createCourse);
 
 router
     .route('/:id')
-    .patch(courseController.updateCourse)
-    .delete(courseController.deleteCourse);
+    .get(isAuthenticated, courseController.getCourse)
+    .patch(isAuthenticated, courseController.updateCourse)
+    .delete(isAuthenticated, courseController.deleteCourse);
 
 module.exports = router;

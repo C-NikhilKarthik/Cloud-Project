@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { required } = require('nconf');
 
 const courseSchema = new mongoose.Schema({
     title: {
@@ -18,11 +19,17 @@ const courseSchema = new mongoose.Schema({
         enum: ['open', 'ongoing', 'closed'],
         required: true
     },
-    // instructor: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'User',
-    //     required: true,
-    // },
+    type: {
+        type: String,
+        enum: ['elective', 'theory'],
+        required: true
+    },
+    instructor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    },
+    studentIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 }, { timestamps: true });
 
 module.exports = mongoose.model('Course', courseSchema);

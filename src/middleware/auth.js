@@ -9,7 +9,7 @@ const isAuthenticated = async (req, res, next) => {
     }
 
     // If you're using JWT for authentication:
-    const token = req.headers.authorization; // Extract token from headers (Bearer Token)
+    const token = req.cookies.jwt; // Extract token from headers (Bearer Token)
 
     if (!token) {
         return res.status(401).json({ message: 'Authentication required' });

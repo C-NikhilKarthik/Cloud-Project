@@ -10,40 +10,58 @@ import {
 } from "@/components/ui/navigation-menu";
 import { GraduationCap } from "lucide-react";
 import Link from "next/link";
-import jwt from "jsonwebtoken";
 import Image from "next/image";
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-function Decode(token: string | undefined) {
-  if (!token) return null; // Return null if no token is provided
-
-  try {
-    // Decode the JWT token safely without verifying it (for client-side)
-    const decoded = jwt.decode(token);
-
-    // Ensure the decoded token is an object and has the expected properties
-    if (decoded && typeof decoded === "object") {
-      return decoded;
-    }
-  } catch (error) {
-    console.error("Error decoding JWT:", error);
-    return null;
-  }
-
-  return null; // Return null if the decoding fails
-}
-
-export function Navigation({ token }: { token?: string }) {
-  const values = Decode(token);
+export function Navigation() {
   const router = useRouter(); // Get the router instance
 
-  const handleLogout = () => {
-    // Remove JWT token from cookies
-    document.cookie = "jwt=; path=/; max-age=0"; // Clear the JWT cookie
+  const handleLogout = async () => {
+    // // Remove JWT token from cookies
+    // document.cookie = "jwt=; path=/; max-age=0";
+    // router.push("/"); // Redirect to the homepage
 
-    // Redirect to the homepage after logging out
-    router.push("/"); // Redirect to the homepage
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_APP_URL}/auth/logout`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (response.data.status === "success") {
+        setUser(null);
+        router.push("/"); // Redirect to the homepage
+      }
+    } catch (error) {
+      console.log(error); // Hide loading state
+    }
   };
+
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_APP_URL}/auth/details`,
+          {
+            withCredentials: true,
+          }
+        );
+
+        if (response.data.status === "success" && response.data.data) {
+          setUser(response.data.data);
+        }
+      } catch (error) {
+        console.log(error); // Hide loading state
+      }
+    };
+
+    fetchCourses();
+  }, []);
 
   return (
     <div className="border-b bg-white">
@@ -73,19 +91,19 @@ export function Navigation({ token }: { token?: string }) {
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
-        {values?.name ? (
+        {user ? (
           <div className="ml-auto flex items-center gap-4">
             <Image
               className="w-10 h-10 rounded-full"
               alt="profile"
-              src={values?.avatar}
+              src={user?.avatar}
               sizes="100%"
               height={0}
               width={0}
             />
             <div className="">
-              <div className="leading-[1]">{values?.name}</div>
-              <div className="text-xs text-slate-700">{values?.email}</div>
+              <div className="leading-[1]">{user?.name}</div>
+              <div className="text-xs text-slate-700">{user?.email}</div>
             </div>
             <Button variant="ghost" onClick={handleLogout}>
               Logout

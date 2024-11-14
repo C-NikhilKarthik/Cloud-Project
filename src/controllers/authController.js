@@ -65,6 +65,52 @@ exports.login = async (req, res) => {
     }
 };
 
+exports.details = (req, res, next) => {
+    try {
+        const token = req.cookies.jwt;
+        if (!token) {
+            return res.status(401).json({
+                status: 'fail',
+                message: 'Authentication required',
+            });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        res.status(200).json({
+            status: 'success',
+            data: decoded,
+        });
+    } catch (err) {
+        res.status(400).json({
+            status: 'fail',
+            message: err.message,
+        });
+    }
+}
+
+exports.logout = (req, res, next) => {
+    try {
+
+        // Clear the JWT cookie by setting it to expire immediately
+        res.clearCookie('jwt');
+
+
+        // Send a successful response
+        res.status(200).json({
+            status: 'success',
+            message: 'Logged out successfully',
+        });
+    } catch (err) {
+        // Send an error response if there's an issue
+        res.status(500).json({
+            status: 'fail',
+            message: err.message,
+        });
+    }
+};
+
+
 exports.googleAuth = (req, res, next) => {
     passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
 };
@@ -75,8 +121,8 @@ exports.googleCallback = (req, res) => {
 
         const token = signToken(user._id, user.name, user.email, user.avatar);
         res.cookie('jwt', token, {
-            // httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            httpOnly: true,           // Prevents JavaScript access
+            secure: false,
             sameSite: 'lax',
             maxAge: 24 * 60 * 60 * 1000 // 24 hours
         });

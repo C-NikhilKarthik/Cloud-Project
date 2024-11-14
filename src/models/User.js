@@ -1,6 +1,7 @@
 // models/User.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const { required } = require('nconf');
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -28,10 +29,16 @@ const userSchema = new mongoose.Schema({
     avatar: {
         type: String
     },
+    role: {
+        type: String, enum: ['student', 'teacher', 'admin'],
+        default: 'student',
+        required: true
+    },
     createdAt: {
         type: Date,
         default: Date.now
-    }
+    },
+
 });
 
 // Hash password before saving (only for local authentication)
