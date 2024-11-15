@@ -5,6 +5,8 @@ export interface Course {
   semester: number;
   enrollStatus: string;
   type: string;
+  instructorName: string;
+  studentIds: string[];
 }
 
 export interface ApiResponse<T> {
@@ -12,4 +14,12 @@ export interface ApiResponse<T> {
   data?: T;
   message?: string;
   results?: number;
+}
+
+export interface UserType {
+  id: string;
+  role: string;
+  email: string;
+  name: string;
+  avatar: string;
 }

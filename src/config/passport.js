@@ -21,7 +21,6 @@ passport.use(
         {
             clientID: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            // callbackURL: process.env.GOOGLE_CALLBACK_URL || 'https://cloud-project-6vgv.onrender.com/auth/google/callback',
             callbackURL: process.env.GOOGLE_CALLBACK_URL || 'https://cloud-project-6vgv.onrender.com/auth/google/callback',
             scope: ['profile', 'email']
         },
@@ -46,11 +45,15 @@ passport.use(
                     }
                 } else {
                     // Create new user if doesn't exist
+                    const emailDomain = profile.emails[0].value.split('@')[1];
+                    const role = emailDomain === 'iiitdwd.ac.in' ? 'teacher' : 'student';
+
                     user = await User.create({
                         googleId: profile.id,
                         email: profile.emails[0].value,
                         name: profile.displayName,
                         avatar: profile.photos[0]?.value,
+                        role: role
                     });
                 }
 

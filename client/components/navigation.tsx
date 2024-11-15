@@ -8,15 +8,15 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, LogOut } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation"; // Import useRouter for navigation
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
 export function Navigation() {
-  const router = useRouter(); // Get the router instance
+  const router = useRouter();
 
   const handleLogout = async () => {
     localStorage.clear();
@@ -29,23 +29,21 @@ export function Navigation() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const token = localStorage.getItem("jwt"); // Retrieve token from localStorage
+        const token = localStorage.getItem("jwt");
 
-        // Axios request
         const response = await axios.get(
           `${process.env.NEXT_PUBLIC_APP_URL}/auth/details`,
           {
             headers: {
-              Authorization: `Bearer ${token}`, // Include the token in Authorization header
+              Authorization: `Bearer ${token}`,
             },
           }
         );
 
-        // Fetch request
         let d = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/auth/details`, {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`, // Include the token in Authorization header
+            Authorization: `Bearer ${token}`,
           },
         });
         d = await d.json();
@@ -56,7 +54,7 @@ export function Navigation() {
           setUser(response.data.data);
         }
       } catch (error) {
-        console.log(error); // Log any errors
+        console.log(error);
       }
     };
 
@@ -97,11 +95,16 @@ export function Navigation() {
             <div className="">
               <div className="leading-[1]">{user?.name}</div>
               <div className="text-xs text-slate-700">{user?.email}</div>
+              <div className="text-xs text-slate-600">{user?.role}</div>
             </div>
-            <Button variant="ghost" onClick={handleLogout}>
+            <Button
+              variant="secondary"
+              onClick={handleLogout}
+              className="flex items-center gap-2 text-red-600 hover:bg-red-100 hover:text-red-800"
+            >
+              <LogOut className="h-4 w-4" />
               Logout
-            </Button>{" "}
-            {/* Logout button */}
+            </Button>
           </div>
         ) : (
           <div className="ml-auto flex items-center gap-4">

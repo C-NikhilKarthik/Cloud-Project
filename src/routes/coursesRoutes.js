@@ -5,6 +5,6 @@ const { protect, isInstructor, isAuthenticated } = require('../middleware/auth')
 
 router
     .route('/')
-    .get(isAuthenticated, courseController.getAllCourses)
+    .get(courseController.getAllCourses)
 
 module.exports = router;

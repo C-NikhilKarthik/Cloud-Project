@@ -30,15 +30,59 @@ const isAuthorized = (req, res, next) => {
 };
 
 // Middleware to check if user is an instructor
-const isInstructor = (req, res, next) => {
-    if (req.user && req.user.role === 'instructor') {
+const isInstructor = async (req, res, next) => {
+    try {
+        // Get the token from the Authorization header
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ message: 'Authorization header is missing or invalid' });
+        }
+        const token = authHeader.split(' ')[1];
+
+        // Verify and decode the token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        console.log(decoded)
+        // Check if the user is an instructor
+        if (!decoded || decoded.role !== 'teacher') {
+            return res.status(403).json({ message: 'Instructor access required' });
+        }
+
+        // Attach the user to the request object
         return next();
+    } catch (error) {
+        console.error('Error in isInstructor middleware:', error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
-    return res.status(403).json({ message: 'Instructor access required' });
+};
+
+const isStudent = async (req, res, next) => {
+    try {
+        // Get the token from the Authorization header
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ message: 'Authorization header is missing or invalid' });
+        }
+        const token = authHeader.split(' ')[1];
+
+        // Verify and decode the token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        console.log(decoded)
+        // Check if the user is an instructor
+        if (!decoded || decoded.role !== 'student') {
+            return res.status(403).json({ message: 'Instructor access required' });
+        }
+
+        // Attach the user to the request object
+        return next();
+    } catch (error) {
+        console.error('Error in isInstructor middleware:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
 };
 
 module.exports = {
     isAuthenticated,
     isAuthorized,
-    isInstructor
+    isInstructor,
+    isStudent
 };

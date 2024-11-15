@@ -1,18 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const courseController = require('../controllers/courseController');
-const { protect, isInstructor, isAuthenticated } = require('../middleware/auth');
-
-// router.use(protect); // Protect all routes
+const { protect, isInstructor, isAuthenticated, isStudent } = require('../middleware/auth');
 
 router
     .route('/')
-    .post(isAuthenticated, courseController.createCourse);
+    .get(isAuthenticated, isInstructor, courseController.getYourCourses)
+    .post(isAuthenticated, isInstructor, courseController.createCourse)
 
 router
     .route('/:id')
     .get(isAuthenticated, courseController.getCourse)
-    .patch(isAuthenticated, courseController.updateCourse)
-    .delete(isAuthenticated, courseController.deleteCourse);
+    .patch(isAuthenticated, isInstructor, courseController.updateCourse)
+    .delete(isAuthenticated, isInstructor, courseController.deleteCourse)
+
+router
+    .route('/:id/register')
+    .get(isAuthenticated, isStudent, courseController.registerCourse) // New route for registering a course
 
 module.exports = router;
