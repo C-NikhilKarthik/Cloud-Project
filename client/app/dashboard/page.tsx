@@ -22,18 +22,27 @@ export default function DashboardPage() {
       setLoading(true); // Show loading state before fetching
 
       try {
-        const response = await axios.get<ApiResponse<Course[]>>(
+        const response = await fetch(
           `${process.env.NEXT_PUBLIC_APP_URL}/courses`,
           {
-            withCredentials: true,
+            credentials: "include", // To include cookies in requests
           }
         );
 
-        if (response.data.status === "success" && response.data.data) {
-          setCourses(response.data.data);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.status === "success" && data.data) {
+            setCourses(data.data);
+          }
+        } else {
+          console.error(
+            "Failed to fetch courses:",
+            response.status,
+            response.statusText
+          );
         }
       } catch (error) {
-        console.log(error);
+        console.error("Error while fetching courses:", error);
       } finally {
         setLoading(false); // Hide loading state
       }
