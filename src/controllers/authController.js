@@ -67,13 +67,16 @@ exports.login = async (req, res) => {
 
 exports.details = (req, res, next) => {
     try {
-        const token = req.cookies.jwt;
-        if (!token) {
+        // Extract token from Authorization header (Bearer <token>)
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({
                 status: 'fail',
                 message: 'Authentication required',
             });
         }
+
+        const token = authHeader.split(' ')[1];  // Get the token from "Bearer <token>"
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
@@ -87,7 +90,7 @@ exports.details = (req, res, next) => {
             message: err.message,
         });
     }
-}
+};
 
 exports.logout = (req, res, next) => {
     try {
@@ -115,22 +118,37 @@ exports.googleAuth = (req, res, next) => {
     passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
 };
 
+// exports.googleCallback = (req, res) => {
+//     passport.authenticate('google', { failureRedirect: '/login' }, (err, user) => {
+//         if (err) return res.status(400).json({ message: err.message });
+
+//         const token = signToken(user._id, user.name, user.email, user.avatar);
+//         res.cookie('jwt', token, {
+//             httpOnly: true,           // Prevents JavaScript access
+//             secure: true,
+//             sameSite: 'None',
+//             maxAge: 24 * 60 * 60 * 1000, // 24 hours
+//             crossSite: true
+//         });
+
+
+//         // Redirect to frontend homepage
+//         res.redirect(`${process.env.CLIENT_URL}/dashboard`);
+//     })(req, res);
+// };
+
 exports.googleCallback = (req, res) => {
     passport.authenticate('google', { failureRedirect: '/login' }, (err, user) => {
-        if (err) return res.status(400).json({ message: err.message });
+        if (err) {
+            return res.redirect(`/login?error=${encodeURIComponent(err.message)}`);
+        }
 
         const token = signToken(user._id, user.name, user.email, user.avatar);
-        res.cookie('jwt', token, {
-            httpOnly: true,           // Prevents JavaScript access
-            secure: true,
-            sameSite: 'None',
-            maxAge: 24 * 60 * 60 * 1000, // 24 hours
-            crossSite: true
-        });
 
-
-        // Redirect to frontend homepage
-        res.redirect(`${process.env.CLIENT_URL}/dashboard`);
+        // Redirect to the frontend with the token
+        res.redirect(`${process.env.CLIENT_URL}/dashboard?token=${encodeURIComponent(token)}`);
     })(req, res);
 };
+
+
 

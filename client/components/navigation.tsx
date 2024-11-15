@@ -19,25 +19,9 @@ export function Navigation() {
   const router = useRouter(); // Get the router instance
 
   const handleLogout = async () => {
-    // // Remove JWT token from cookies
-    // document.cookie = "jwt=; path=/; max-age=0";
-    // router.push("/"); // Redirect to the homepage
-
-    try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_APP_URL}/auth/logout`,
-        {
-          withCredentials: true,
-        }
-      );
-
-      if (response.data.status === "success") {
-        setUser(null);
-        router.push("/"); // Redirect to the homepage
-      }
-    } catch (error) {
-      console.log(error); // Hide loading state
-    }
+    localStorage.clear();
+    setUser(null);
+    router.push("/");
   };
 
   const [user, setUser] = useState(null);
@@ -45,16 +29,24 @@ export function Navigation() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
+        const token = localStorage.getItem("jwt"); // Retrieve token from localStorage
+
+        // Axios request
         const response = await axios.get(
           `${process.env.NEXT_PUBLIC_APP_URL}/auth/details`,
           {
-            withCredentials: true,
+            headers: {
+              Authorization: `Bearer ${token}`, // Include the token in Authorization header
+            },
           }
         );
 
+        // Fetch request
         let d = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/auth/details`, {
           method: "GET",
-          credentials: "include", // To include cookies in requests
+          headers: {
+            Authorization: `Bearer ${token}`, // Include the token in Authorization header
+          },
         });
         d = await d.json();
 
@@ -64,7 +56,7 @@ export function Navigation() {
           setUser(response.data.data);
         }
       } catch (error) {
-        console.log(error); // Hide loading state
+        console.log(error); // Log any errors
       }
     };
 
@@ -83,13 +75,6 @@ export function Navigation() {
         </Link>
         <NavigationMenu className="mx-6">
           <NavigationMenuList>
-            <NavigationMenuItem>
-              <Link href="/courses" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Courses
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
             <NavigationMenuItem>
               <Link href="/dashboard" legacyBehavior passHref>
                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>

@@ -8,6 +8,7 @@ import axios from "axios";
 import { Course, ApiResponse } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { CourseDialog } from "@/components/dashboard/course-dialog";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -16,16 +17,35 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true); // to track loading state
   const { toast } = useToast();
 
+  const router = useRouter();
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    // console.log(urlParams);
+    const token = urlParams.get("token");
+
+    if (token) {
+      localStorage.setItem("jwt", token);
+      router.replace("/dashboard"); // Clear query parameters from the URL
+    } else {
+      router.push("/login"); // Redirect to login if token is missing
+    }
+  }, []);
+
   // Fetch courses on page load
   useEffect(() => {
     const fetchCourses = async () => {
       setLoading(true); // Show loading state before fetching
 
       try {
+        const token = localStorage.getItem("jwt"); // Retrieve token from localStorage
+
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_APP_URL}/courses`,
           {
-            credentials: "include", // To include cookies in requests
+            headers: {
+              Authorization: `Bearer ${token}`, // Set token in Authorization header
+            },
           }
         );
 
@@ -60,8 +80,12 @@ export default function DashboardPage() {
       : `${process.env.NEXT_PUBLIC_APP_URL}/course`;
 
     try {
+      const token = localStorage.getItem("jwt"); // Retrieve token from localStorage
+
       const response = await axios[method]<ApiResponse<Course>>(url, course, {
-        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${token}`, // Set token in Authorization header
+        },
       });
 
       if (response.data.status === "success" && response.data.data) {
@@ -92,10 +116,14 @@ export default function DashboardPage() {
   // Delete a course
   const handleDeleteCourse = async (id: string) => {
     try {
+      const token = localStorage.getItem("jwt"); // Retrieve token from localStorage
+
       const response = await axios.delete(
         `${process.env.NEXT_PUBLIC_APP_URL}/course/${id}`,
         {
-          withCredentials: true,
+          headers: {
+            Authorization: `Bearer ${token}`, // Set token in Authorization header
+          },
         }
       );
 

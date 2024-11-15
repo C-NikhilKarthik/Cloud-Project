@@ -1,6 +1,6 @@
 const Course = require('../models/Course');
 const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
 
 exports.getCourse = async (req, res) => {
     const course_id = req.params.id;
@@ -14,9 +14,7 @@ exports.getCourse = async (req, res) => {
     }
 
     try {
-        const course = await Course.findOne(
-            { _id: course_id }
-        );
+        const course = await Course.findOne({ _id: course_id });
 
         if (!course) {
             return res.status(404).json({
@@ -35,33 +33,27 @@ exports.getCourse = async (req, res) => {
             message: err.message,
         });
     }
-}
+};
 
 exports.createCourse = async (req, res) => {
-    // console.log(req.headers)
     try {
-        const token = req.cookies.jwt;
-        if (!token) {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({
                 status: 'fail',
                 message: 'Authentication required',
             });
         }
 
+        const token = authHeader.split(' ')[1]; // Get the token from "Bearer <token>"
+
         // Verify and decode JWT token to get user info
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        // Check if the user is an instructor
-        // if (decoded.role !== 'instructor') {
-        //     return res.status(403).json({
-        //         status: 'fail',
-        //         message: 'Only instructors can access this resource',
-        //     });
-        // }
-
+        // Create the course
         const course = await Course.create({
             ...req.body,
-            instructor: decoded.id
+            instructor: decoded.id,
         });
 
         res.status(201).json({
@@ -78,30 +70,22 @@ exports.createCourse = async (req, res) => {
 
 exports.getAllCourses = async (req, res) => {
     try {
-        // Get JWT token from cookies
-        const token = req.cookies.jwt;
-        if (!token) {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({
                 status: 'fail',
                 message: 'Authentication required',
             });
         }
 
+        const token = authHeader.split(' ')[1]; // Get the token from "Bearer <token>"
+
         // Verify and decode JWT token to get user info
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        // Check if the user is an instructor
-        // if (decoded.role !== 'instructor') {
-        //     return res.status(403).json({
-        //         status: 'fail',
-        //         message: 'Only instructors can access this resource',
-        //     });
-        // }
-
-        // Find courses where professorId matches the decoded user ID
+        // Find courses where instructor matches the decoded user ID
         const courses = await Course.find({ instructor: decoded.id });
 
-        // Respond with the filtered courses
         res.status(200).json({
             status: 'success',
             results: courses.length,
@@ -127,6 +111,20 @@ exports.updateCourse = async (req, res) => {
     }
 
     try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({
+                status: 'fail',
+                message: 'Authentication required',
+            });
+        }
+
+        const token = authHeader.split(' ')[1]; // Get the token from "Bearer <token>"
+
+        // Verify and decode JWT token to get user info
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // Update the course
         const course = await Course.findOneAndUpdate(
             { _id: course_id },
             req.body,
@@ -153,9 +151,21 @@ exports.updateCourse = async (req, res) => {
 };
 
 exports.deleteCourse = async (req, res) => {
-    // const id = req.user.id
-
     try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({
+                status: 'fail',
+                message: 'Authentication required',
+            });
+        }
+
+        const token = authHeader.split(' ')[1]; // Get the token from "Bearer <token>"
+
+        // Verify and decode JWT token to get user info
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // Delete the course
         const course = await Course.findOneAndDelete({
             _id: req.params.id,
         });
@@ -171,7 +181,6 @@ exports.deleteCourse = async (req, res) => {
             status: 'success',
             message: 'Course deleted successfully',
         });
-
     } catch (err) {
         res.status(400).json({
             status: 'fail',

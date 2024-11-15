@@ -3,17 +3,13 @@ const User = require('../models/User');  // Adjust according to your user model 
 
 // Middleware to ensure user is authenticated
 const isAuthenticated = async (req, res, next) => {
-    // If you're using Passport.js:
-    if (req.isAuthenticated()) {
-        return next();
-    }
-
-    // If you're using JWT for authentication:
-    const token = req.cookies.jwt; // Extract token from headers (Bearer Token)
-
-    if (!token) {
+    // Extract token from Authorization header (Bearer <token>)
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ message: 'Authentication required' });
     }
+
+    const token = authHeader.split(' ')[1];  // Get the token from "Bearer <token>"
 
     // Verify JWT token and get the user
     try {
