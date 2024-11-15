@@ -4,7 +4,7 @@ const passport = require('passport');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
-const signToken = (id, name, email, avatar, role) => {
+const signToken = (id, name, email, role, avatar) => {
     return jwt.sign({ id, name, email, avatar, role }, JWT_SECRET, {
         expiresIn: '1d',
     });
@@ -52,7 +52,7 @@ exports.login = async (req, res) => {
             });
         }
 
-        const token = signToken(user._id);
+        const token = signToken(user._id, user.name, user.email, user.role);
         res.status(200).json({
             status: 'success',
             token,
@@ -143,7 +143,7 @@ exports.googleCallback = (req, res) => {
             return res.redirect(`/login?error=${encodeURIComponent(err.message)}`);
         }
 
-        const token = signToken(user._id, user.name, user.email, user.avatar, user.role);
+        const token = signToken(user._id, user.name, user.email, user.role, user.avatar);
 
         // Redirect to the frontend with the token
         res.redirect(`${process.env.CLIENT_URL}/dashboard?token=${encodeURIComponent(token)}`);

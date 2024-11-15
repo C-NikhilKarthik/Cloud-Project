@@ -13,37 +13,42 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { GraduationCap } from "lucide-react";
 import Link from "next/link";
-import jwt from "jsonwebtoken";
-import { useRouter } from "next/navigation"; // Import useRouter for navigation
-import { useEffect } from "react";
+import axios from "axios";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const router = useRouter(); // Get the router instance
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [errorMessage, setErrorMessage] = useState("");
+  const router = useRouter();
 
-  // Function to check if JWT token exists and decode it
-  // const checkTokenAndRedirect = () => {
-  //   const token = document.cookie
-  //     .split("; ")
-  //     .find((row) => row.startsWith("jwt="))
-  //     ?.split("=")[1];
+  const handleInputChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value,
+    });
+  };
 
-  //   if (token) {
-  //     try {
-  //       const decoded = jwt.decode(token);
-  //       if (decoded) {
-  //         // If the token is valid, redirect to the dashboard
-  //         router.push("/dashboard");
-  //       }
-  //     } catch (error) {
-  //       console.error("Invalid token:", error);
-  //     }
-  //   }
-  // };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMessage("");
 
-  // // Call checkTokenAndRedirect when the component mounts
-  // useEffect(() => {
-  //   checkTokenAndRedirect();
-  // }, []);
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_APP_URL}/auth/login`,
+        formData
+      );
+
+      if (response.status === 200) {
+        // Save JWT to cookies or localStorage (example with localStorage)
+        localStorage.setItem("jwt", response.data.token);
+        // Redirect to dashboard
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      setErrorMessage(error.response?.data?.message || "Login failed");
+    }
+  };
 
   const googleAuth = () => {
     window.open(
@@ -63,7 +68,7 @@ export default function LoginPage() {
           <CardDescription>Sign in to your LearnHub account</CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -71,6 +76,8 @@ export default function LoginPage() {
                   id="email"
                   placeholder="Enter your email"
                   type="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
                   required
                 />
               </div>
@@ -80,12 +87,17 @@ export default function LoginPage() {
                   id="password"
                   placeholder="Enter your password"
                   type="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
                   required
                 />
               </div>
               <Button className="w-full" type="submit">
                 Sign In
               </Button>
+              {errorMessage && (
+                <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+              )}
             </div>
           </form>
 
@@ -98,10 +110,7 @@ export default function LoginPage() {
               Sign in with Google
             </button>
             <span className="text-gray-600">Don&apos;t have an account? </span>
-            <Link
-              href="/auth/register"
-              className="text-primary hover:underline"
-            >
+            <Link href="/register" className="text-primary hover:underline">
               Sign up
             </Link>
           </div>

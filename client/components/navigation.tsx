@@ -39,17 +39,6 @@ export function Navigation() {
             },
           }
         );
-
-        let d = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/auth/details`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        d = await d.json();
-
-        console.log(d);
-
         if (response.data.status === "success" && response.data.data) {
           setUser(response.data.data);
         }
@@ -84,14 +73,22 @@ export function Navigation() {
         </NavigationMenu>
         {user ? (
           <div className="ml-auto flex items-center gap-4">
-            <Image
-              className="w-10 h-10 rounded-full"
-              alt="profile"
-              src={user?.avatar}
-              sizes="100%"
-              height={0}
-              width={0}
-            />
+            {/* If no avatar, display the first letter of the user's name */}
+            {!user?.avatar && user?.name ? (
+              <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-400 text-white">
+                {user?.name.charAt(0).toUpperCase()}
+              </div>
+            ) : (
+              <Image
+                className="w-10 h-10 rounded-full"
+                alt="profile"
+                src={user?.avatar || undefined} // Fallback if avatar is missing
+                sizes="100%"
+                height={0}
+                width={0}
+              />
+            )}
+
             <div className="">
               <div className="leading-[1]">{user?.name}</div>
               <div className="text-xs text-slate-700">{user?.email}</div>
