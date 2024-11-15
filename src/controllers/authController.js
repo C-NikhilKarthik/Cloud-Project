@@ -123,9 +123,11 @@ exports.googleCallback = (req, res) => {
         res.cookie('jwt', token, {
             httpOnly: true,           // Prevents JavaScript access
             secure: true,
-            sameSite: 'none',
-            maxAge: 24 * 60 * 60 * 1000 // 24 hours
+            sameSite: 'None',
+            maxAge: 24 * 60 * 60 * 1000, // 24 hours
+            crossSite: true
         });
+
 
         // Redirect to frontend homepage
         res.redirect(`${process.env.CLIENT_URL}/dashboard`);

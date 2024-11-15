@@ -52,6 +52,14 @@ export function Navigation() {
           }
         );
 
+        let d = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/auth/details`, {
+          method: "GET",
+          credentials: "include", // To include cookies in requests
+        });
+        d = await d.json();
+
+        console.log(d);
+
         if (response.data.status === "success" && response.data.data) {
           setUser(response.data.data);
         }

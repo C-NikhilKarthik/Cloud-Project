@@ -21,29 +21,29 @@ export default function LoginPage() {
   const router = useRouter(); // Get the router instance
 
   // Function to check if JWT token exists and decode it
-  const checkTokenAndRedirect = () => {
-    const token = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("jwt="))
-      ?.split("=")[1];
+  // const checkTokenAndRedirect = () => {
+  //   const token = document.cookie
+  //     .split("; ")
+  //     .find((row) => row.startsWith("jwt="))
+  //     ?.split("=")[1];
 
-    if (token) {
-      try {
-        const decoded = jwt.decode(token);
-        if (decoded) {
-          // If the token is valid, redirect to the dashboard
-          router.push("/dashboard");
-        }
-      } catch (error) {
-        console.error("Invalid token:", error);
-      }
-    }
-  };
+  //   if (token) {
+  //     try {
+  //       const decoded = jwt.decode(token);
+  //       if (decoded) {
+  //         // If the token is valid, redirect to the dashboard
+  //         router.push("/dashboard");
+  //       }
+  //     } catch (error) {
+  //       console.error("Invalid token:", error);
+  //     }
+  //   }
+  // };
 
-  // Call checkTokenAndRedirect when the component mounts
-  useEffect(() => {
-    checkTokenAndRedirect();
-  }, []);
+  // // Call checkTokenAndRedirect when the component mounts
+  // useEffect(() => {
+  //   checkTokenAndRedirect();
+  // }, []);
 
   const googleAuth = () => {
     window.open(
